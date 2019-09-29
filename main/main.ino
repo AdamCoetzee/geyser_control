@@ -2,70 +2,124 @@
 #include <WiFiNINA.h>
 #include <string.h>
 
-//For establishing wifi connection
-char ssid[] = "reedflute_flat";          //  your network SSID (name) 
-char pass[] = "hungary1";   // your network passwor
-int status = WL_IDLE_STATUS;
-IPAddress server(192,168,1,100);  // server
-WiFiClient client;  // Initialize the client library
+#define LED_WIFI 6
+#define LED_SERVER 7
+#define LED_GEYSER 9
+
+//For establishing wifi and server connection
+char ssid[] = "reedflute_flat";         //  your network SSID (name) 
+char pass[] = "hungary1";   			// your network passwor
+int status = WL_IDLE_STATUS;			//status of WiFi connection
+IPAddress server(192,168,1,100);  		// server
+WiFiClient client; 	 					// Initialize the client library
 
 #define MAXLENGTH 100
-uint8_t commandBuffer[MAXLENGTH];//buffer to store incoming message.
+uint8_t commandBuffer[MAXLENGTH];		//buffer to store incoming command.
 
-void connectWiFi();
 void runCommand(char command[]);
+int checkWifi();
+void checkServer();
+void setLEDs();
 
 void setup() 
 {
-  pinMode(9, OUTPUT);
-  digitalWrite(9, LOW);
-  
-  Serial.begin(9600);
-  Serial.println("Attempting to connect to WPA network...");
-  Serial.print("SSID: ");
-  Serial.println(ssid);
-  connectWiFi();
+	setLEDs();	
 }
 
 void loop()
 {
   memset(commandBuffer, 0, sizeof(commandBuffer));
+  status = checkWifi();
+	checkServer();
 
   if (client.available()) 
 	{
     client.read(commandBuffer, sizeof(commandBuffer));
-    client.println((char*)commandBuffer);   
     runCommand((char*)commandBuffer);
   } 
 }
 
-void connectWiFi()
+int checkWifi()//check wifi connection status, attempt to connect if not connected
 {
-  status = WiFi.begin(ssid, pass);
-  if ( status != WL_CONNECTED) { 
-    Serial.println("Couldn't get a wifi connection");
-    delay(1000); // don't do anything else:
-  } 
-  else {
-    Serial.println("Connected to wifi");
-    Serial.println("Starting connection...");
-    // if you get a connection, report back via serial:
-    if (client.connect(server, 4444)) {
-      Serial.println("connected");
-      client.println("Connected arduino to TCP socket :)");
-    }
-  }
+	int CurrentStatus = WiFi.status();	//retreive current status
+	if (CurrentStatus == WL_CONNECTED)	//if currently connected
+	{
+		digitalWrite(LED_WIFI, HIGH);
+		return CurrentStatus;
+	}
+	else	//attempt to connect, if not connected
+	{
+		CurrentStatus = WiFi.begin(ssid, pass);
+		if (CurrentStatus == WL_CONNECTED)
+		{
+			digitalWrite(LED_WIFI, HIGH);
+		}
+		else
+		{
+			digitalWrite(LED_WIFI, HIGH);
+			delay(1000);
+			digitalWrite(LED_WIFI, LOW);
+		}
+		return CurrentStatus;
+	}
+}
+
+void checkServer()//check server connection status, attempt to connect if not connected
+{
+	if(client.connected())
+	{
+		digitalWrite(LED_SERVER, HIGH);
+		return;
+	}
+	else
+	{
+		if(client.connect(server, 4444))
+		{
+			digitalWrite(LED_SERVER, HIGH);
+			client.println("Connected");
+			return;
+		}
+		else
+		{
+			digitalWrite(LED_SERVER, HIGH);
+			delay(1000);
+			digitalWrite(LED_SERVER, LOW);
+			return;
+		}		
+	}
 }
 
 void runCommand(char command[])
 {
-  if (strcmp(command, "g_turnOn\n") == 0)
+  if (strcmp(command, "g_turnOn") == 0)
   {
-    digitalWrite(9, HIGH);
+    digitalWrite(LED_GEYSER, HIGH);
+		client.println("GEYSER ON");
+		return;
   }
 
-  if (strcmp(command, "g_turnOff\n") == 0)
+  if (strcmp(command, "g_turnOff") == 0)
   {
-    digitalWrite(9, LOW);
+    digitalWrite(LED_GEYSER, LOW);
+		client.println("GEYSER OFF");
+		return;
   } 
+
+	client.print("unrecognized command");
+	return;
+}
+
+void setLEDs()
+{
+  pinMode(LED_WIFI, OUTPUT);
+  pinMode(LED_SERVER, OUTPUT);
+  pinMode(LED_GEYSER, OUTPUT);
+ 
+  digitalWrite(LED_WIFI, HIGH);
+  digitalWrite(LED_SERVER, HIGH);
+  digitalWrite(LED_GEYSER, HIGH);
+	delay(1000);
+  digitalWrite(LED_WIFI, LOW);
+  digitalWrite(LED_SERVER, LOW);
+  digitalWrite(LED_GEYSER, LOW);
 }
