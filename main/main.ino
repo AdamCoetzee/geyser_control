@@ -1,6 +1,10 @@
+/*
+	This branch works on lcd functionality
+*/
 #include <SPI.h>
 #include <WiFiNINA.h>
 #include <string.h>
+#include <LiquidCrystal.h>
 
 #define LED_WIFI 6
 #define LED_SERVER 7
