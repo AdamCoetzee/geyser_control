@@ -9,6 +9,8 @@
 #define LED_WIFI 6
 #define LED_SERVER 7
 #define LED_GEYSER 9
+//LCD
+LiquidCrystal lcd(0, 1, 2, 3, 4, 5);
 
 //For establishing wifi and server connection
 char ssid[] = "reedflute_flat";         //  your network SSID (name) 
@@ -27,7 +29,10 @@ void setLEDs();
 
 void setup() 
 {
+	lcd.begin(16,2);
+	delay(1000);
 	setLEDs();	
+	lcd.print("Hey Dane");
 }
 
 void loop()
