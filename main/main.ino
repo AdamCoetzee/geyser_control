@@ -20,8 +20,8 @@ byte tick[8] = {
 };
 
 //For establishing wifi and server connection
-char ssid[] = NET_ID;         //  your network SSID (name) 
-char pass[] = NET_PWD;   			// your network password
+char ssid[] = NET_ID;                   //  your network SSID (name) 
+char pass[] = NET_PWD;   			    // your network password
 int status = WL_IDLE_STATUS;			//status of WiFi connection
 IPAddress server(192,168,1,100);  		// server
 WiFiClient client;					    // Initialize the client library
@@ -48,7 +48,7 @@ void loop()
     checkServer();
 
     if (client.available()) 
-	{
+    {
         client.read(commandBuffer, sizeof(commandBuffer));
         runCommand((char*)commandBuffer);
     } 
@@ -64,60 +64,60 @@ int checkWifi()//check wifi connection status, attempt to connect if not connect
         digitalWrite(LED_WIFI, HIGH);
         return CurrentStatus;
     }
-	else	//attempt to connect, if not connected
-	{
+    else	//attempt to connect, if not connected
+    {
         lcd.setCursor(4, 0);
         lcd.write('?');
-		CurrentStatus = WiFi.begin(ssid, pass);
-		if (CurrentStatus == WL_CONNECTED)
-		{
+        CurrentStatus = WiFi.begin(ssid, pass);
+        if (CurrentStatus == WL_CONNECTED)
+        {
             lcd.setCursor(4, 0);
             lcd.write(byte(0));
-			digitalWrite(LED_WIFI, HIGH);
-		}
-		else
-		{
+            digitalWrite(LED_WIFI, HIGH);
+        }
+        else
+        {
             lcd.setCursor(4, 0);
             lcd.write('X');
-			digitalWrite(LED_WIFI, HIGH);
-			delay(1000);
-			digitalWrite(LED_WIFI, LOW);
-		}
-		return CurrentStatus;
-	}
+            digitalWrite(LED_WIFI, HIGH);
+            delay(1000);
+            digitalWrite(LED_WIFI, LOW);
+        }
+        return CurrentStatus;
+    }
 }
 
 void checkServer()//check server connection status, attempt to connect if not connected
 {
-	if(client.connected())
-	{
+    if(client.connected())
+    {
         lcd.setCursor(7, 0);
         lcd.write(byte(0));
-		digitalWrite(LED_SERVER, HIGH);
-		return;
-	}
-	else
-	{
+        digitalWrite(LED_SERVER, HIGH);
+        return;
+    }
+    else
+    {
         lcd.setCursor(7, 0);
         lcd.write('?');
-		if(client.connect(server, 4444))
-		{
+        if(client.connect(server, 4444))
+        {
             lcd.setCursor(7, 0);
             lcd.write(byte(0));
-			digitalWrite(LED_SERVER, HIGH);
-			client.println("Connected");
-			return;
-		}
+            digitalWrite(LED_SERVER, HIGH);
+            client.println("Connected");
+            return;
+        }
 		else
-		{
+        {
             lcd.setCursor(7, 0);
             lcd.write('X');
-			digitalWrite(LED_SERVER, HIGH);
-			delay(1000);
-			digitalWrite(LED_SERVER, LOW);
-			return;
-		}		
-	}
+            digitalWrite(LED_SERVER, HIGH);
+            delay(1000);
+            digitalWrite(LED_SERVER, LOW);
+            return;
+        }		
+    }
 }
 
 void runCommand(char command[])
@@ -140,8 +140,8 @@ void runCommand(char command[])
         return;
     } 
 
-	client.print("unrecognized command");
-	return;
+    client.print("unrecognized command");
+    return;
 }
 
 void setLEDs()
