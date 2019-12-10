@@ -2,6 +2,7 @@
 #include <WiFiNINA.h>
 #include <string.h>
 #include <LiquidCrystal.h>
+#include "cred.h"
 
 #define LED_WIFI 6
 #define LED_SERVER 7
@@ -19,11 +20,11 @@ byte tick[8] = {
 };
 
 //For establishing wifi and server connection
-char ssid[] = "reedflute_flat";         //  your network SSID (name) 
-char pass[] = "hungary1";   			// your network password
+char ssid[] = NET_ID;         //  your network SSID (name) 
+char pass[] = NET_PWD;   			// your network password
 int status = WL_IDLE_STATUS;			//status of WiFi connection
 IPAddress server(192,168,1,100);  		// server
-WiFiClient client;					// Initialize the client library
+WiFiClient client;					    // Initialize the client library
 
 #define MAXLENGTH 100
 uint8_t commandBuffer[MAXLENGTH];		//buffer to store incoming command.
