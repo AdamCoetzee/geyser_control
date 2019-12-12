@@ -4,10 +4,12 @@
 #include <LiquidCrystal.h>
 #include "cred.h"
 
+//LED INDICATORS
 #define LED_WIFI 6
 #define LED_SERVER 7
 #define LED_GEYSER 9
-//LCD
+
+//CUSTOM CHHARACTER DEFINITION
 LiquidCrystal lcd(0, 1, 2, 3, 4, 5);
 byte tick[8] = {
   B00000,
