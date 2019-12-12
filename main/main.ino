@@ -23,7 +23,7 @@ byte tick[8] = {
 char ssid[] = NET_ID;                   //  your network SSID (name) 
 char pass[] = NET_PWD;   			    // your network password
 int status = WL_IDLE_STATUS;			//status of WiFi connection
-IPAddress server(192,168,1,100);  		// server
+IPAddress server(192,168,1,11);  		// server
 WiFiClient client;					    // Initialize the client library
 
 #define MAXLENGTH 100
@@ -34,6 +34,7 @@ int checkWifi();
 void checkServer();
 void setLEDs();
 void setLCD();
+void setLCDcmd();
 
 void setup() 
 {
@@ -128,6 +129,8 @@ void runCommand(char command[])
         lcd.write(byte(0));
         digitalWrite(LED_GEYSER, HIGH);
         client.println("GEYSER ON");
+        setLCDcmd();
+        lcd.print("GEYSER ON");
         return;
     }
 
@@ -136,11 +139,14 @@ void runCommand(char command[])
         lcd.setCursor(1, 0);
         lcd.write('X');
         digitalWrite(LED_GEYSER, LOW);
-        client.println("GEYSER OFF");
+        client.println("GEYSER OFF");        
+        setLCDcmd();
+        lcd.print("GEYSER OFF");
         return;
-    } 
-
-    client.print("unrecognized command");
+    }
+ 
+    setLCDcmd();
+    lcd.print("unrecognized command");
     return;
 }
 
@@ -164,4 +170,15 @@ void setLCD()
     lcd.createChar(0, tick);
     lcd.begin(16,2);
     lcd.print("GX WX SX 00:00");
+}
+
+void setLCDcmd()//clears bottom lcd row and sets cursor for cmd
+{
+    int k;
+    lcd.setCursor(0, 1);
+    for (k=0; k<16; k++)
+    {
+        lcd.write(' ');
+    }
+    lcd.setCursor(0, 1);
 }
