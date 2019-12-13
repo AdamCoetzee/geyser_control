@@ -1,5 +1,6 @@
 #SERVER
-
+import threading
+import time
 from socket import *
 
 def server(address):
@@ -9,34 +10,40 @@ def server(address):
     while True:
         client, addr = sock.accept()
         print('Connection from ', addr)
-        handler(client)
-        command = input()
-        if "s_" in command:
-            s_command(command)
+        run = handler(client)
+    sock.close()
+    exit()
 
 def handler(client):
+    cmd_thread = threading.Thread(target=runcommand, args=[client])
+    cmd_thread.start()                
     while True:
+        time.sleep(0.2)
         data = client.recv(128)
         if not data:
             break
         print(data)
+       
+    print('Connection closed')
+    client.close()
+    return False    
+
+def runcommand(client):
+    while True:
         command = input()
         if "g_" in command:
             g_command(client, command)
 
         if "s_" in command:
             s_command(client, command)
-            
-    print('Connection closed')
-    client.close()
+        
+
 
 def g_command(client, command):
     client.sendall(str.encode(command))
 
 #def s_command(client, command):
-#    if "exit" in command:
-        
-
+          
 if __name__ == '__main__':
     while True:
         server(('', 4444))
