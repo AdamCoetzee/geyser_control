@@ -3,6 +3,7 @@
 #include <string.h>
 #include <LiquidCrystal.h>
 #include "cred.h"
+#include <RTCZero.h>
 
 //LED INDICATORS
 #define LED_WIFI 6
@@ -28,6 +29,11 @@ int status = WL_IDLE_STATUS;			//status of WiFi connection
 IPAddress server(192,168,1,11);  		// server
 WiFiClient client;					    // Initialize the client library
 
+//Internal Clock
+RTCZero rtc;
+const int GMT = 2;
+char currentTime[10];    //current time hh:mm:ss
+
 #define MAXLENGTH 100
 uint8_t commandBuffer[MAXLENGTH];		//buffer to store incoming command.
 
@@ -37,11 +43,13 @@ void checkServer();
 void setLEDs();
 void setLCD();
 void setLCDcmd();
+void printLCDTime();
 
 void setup() 
 {
     setLEDs();	
     setLCD();
+    rtc.begin();
 }
 
 void loop()
@@ -55,6 +63,8 @@ void loop()
         client.read(commandBuffer, sizeof(commandBuffer));
         runCommand((char*)commandBuffer);
     } 
+        
+    printLCDTime();    
 }
 
 int checkWifi()//check wifi connection status, attempt to connect if not connected
@@ -146,9 +156,19 @@ void runCommand(char command[])
         lcd.print("GEYSER OFF");
         return;
     }
+
+    if (strncmp (command,"g_setTime",9) == 0)
+    {
+        setLCDcmd();
+        uint32_t epoch;
+        char comm[128];
+        sscanf(command, "%s %u", comm, &epoch);
+        setLCDcmd();
+        rtc.setEpoch((uint32_t)epoch);
+        return;
+    }    
  
     setLCDcmd();
-    lcd.print("unrecognized command");
     return;
 }
 
@@ -171,7 +191,7 @@ void setLCD()
 {
     lcd.createChar(0, tick);
     lcd.begin(16,2);
-    lcd.print("GX WX SX 00:00");
+    lcd.print("GX WX SX00:00:00");
 }
 
 void setLCDcmd()//clears bottom lcd row and sets cursor for cmd
@@ -184,3 +204,24 @@ void setLCDcmd()//clears bottom lcd row and sets cursor for cmd
     }
     lcd.setCursor(0, 1);
 }
+
+void printLCDTime()
+{
+    int k;
+    //clear current time
+    lcd.setCursor(8, 0);
+    for(k=0; k<8; k++)
+    {
+        lcd.write(' ');
+    } 
+    lcd.setCursor(8, 0);    
+    memset(currentTime, 0, sizeof(currentTime));
+    int hour = rtc.getHours()+GMT;
+    int minute = rtc.getMinutes();
+    int second = rtc.getSeconds();   
+
+    snprintf(currentTime, sizeof(currentTime), "%d%s%d%s%d", hour, ":", minute, ":", second);
+    lcd.print(currentTime);
+    delay(1000);
+}
+

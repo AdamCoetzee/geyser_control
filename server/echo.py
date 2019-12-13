@@ -1,12 +1,16 @@
 #SERVER
 import threading
 import time
+import calendar
+import datetime
 from socket import *
 
 def server(address):
+    print('starting server...')
     sock = socket(AF_INET, SOCK_STREAM)
     sock.bind(address)
     sock.listen(1)
+    print('listening for connection...')
     while True:
         client, addr = sock.accept()
         print('Connection from ', addr)
@@ -15,35 +19,61 @@ def server(address):
     exit()
 
 def handler(client):
-    cmd_thread = threading.Thread(target=runcommand, args=[client])
-    cmd_thread.start()                
+    serverCmd_thread = threading.Thread(target=serverCommand, args=[client])
+    serverCmd_thread.start()                
     while True:
         time.sleep(0.2)
         data = client.recv(128)
         if not data:
             break
-        print(data)
+        print('arduino: ', data)
+        if b'gs_' in data:
+            gs_command(client, data)
        
     print('Connection closed')
     client.close()
     return False    
 
-def runcommand(client):
+#handling ONLY commands issued through server console
+def serverCommand(client):
     while True:
         command = input()
         if "g_" in command:
             g_command(client, command)
 
-        if "s_" in command:
+        elif "s_" in command:
             s_command(client, command)
-        
 
+        else:
+            print('invalid command')
 
-def g_command(client, command):
-    client.sendall(str.encode(command))
+#commands sent from the arduino to the server
+def gs_command(client, command): 
+    if b'fetchTime' in command:
+        now = datetime.datetime.now()
+        print(f"Current time is : {now.hour}:{now.minute}")    
+    else:
+        print('invalid request from arduino')    
 
-#def s_command(client, command):
-          
+#commands sent directly to the arduino from server console
+def g_command(client, command): 
+    if "sendTime" in command:
+        epoch = int(calendar.timegm(time.gmtime()))
+        epoch = "g_setTime "+str(epoch)
+        print('updating arduino time: ', epoch)
+        client.sendall(str.encode(epoch))
+    else:
+        client.sendall(str.encode(command))
+
+#commands issued to the server from server console
+def s_command(client, command):
+    if "getTime" in command:
+        now = datetime.datetime.now()
+        print(f"Current time is : {now.hour}:{now.minute}")    
+
+    else: 
+        print('invalid s command')    
+      
 if __name__ == '__main__':
     while True:
         server(('', 4444))
