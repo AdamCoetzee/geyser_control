@@ -124,8 +124,11 @@ void checkServer()//check server connection status, attempt to connect if not co
 {
     if(client.connected())
     {
+        client.println("gs_conConfirm");//send a message every so often to confirm connection
         lcd.setCursor(7, 0);
         lcd.write(byte(0));
+        digitalWrite(LED_SERVER, LOW);
+        delay(500);
         digitalWrite(LED_SERVER, HIGH);
         return;
     }
@@ -239,7 +242,6 @@ void runCommand(char command[])
     return;
 }
 
-
 //update current time and update current state
 void checkTime()
 {
@@ -256,7 +258,7 @@ void checkTime()
         if (OnTimeStatus == 1)  //if currentTime BEFORE On_Time
         {
             geyserOff();
-            snprintf(info, sizeof(info), "On: %d:%d-%d:%d", On_Time.hour, On_Time.minute, Off_Time.hour, Off_Time.minute);
+            snprintf(info, sizeof(info), "set: %d:%d-%d:%d", On_Time.hour, On_Time.minute, Off_Time.hour, Off_Time.minute);
             clearLCDInfo();
             lcd.print(info);
         }
@@ -272,7 +274,7 @@ void checkTime()
         if (OffTimeStatus == 0) //if AFTER Off_Time
         {
             geyserOff();
-            snprintf(info, sizeof(info), "On: %d:%d-%d:%d", On_Time.hour, On_Time.minute, Off_Time.hour, Off_Time.minute);
+            snprintf(info, sizeof(info), "set: %d:%d-%d:%d", On_Time.hour, On_Time.minute, Off_Time.hour, Off_Time.minute);
             clearLCDInfo();
             lcd.print(info);
         }
