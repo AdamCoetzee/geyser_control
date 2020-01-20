@@ -6,8 +6,11 @@ import datetime
 from socket import *
 
 EXIT_STATUS = 0;    #flag for program termination
+s_conn = [];        #list of connected clients
+s_addr = [];        #corresponding list of addresses
 
 def main():
+    global EXIT_STATUS
     serverCmd_thread = threading.Thread(target=serverCommand)
     serverCmd_thread.start()     
 
@@ -22,12 +25,12 @@ def main():
 
     sock.listen(1)
     
-    while EXIT_STATUS == 0:
+    while True:
         print('initial bounded socket listening for connection...')
         client, addr = sock.accept()    #with client a socket object
         print('socket connection initiated from ', addr)
         client.settimeout(25)
-        while EXIT_STATUS == 0:
+        while True:
             try:
                 data = client.recv(128)
                 print('arduino: ', data)
@@ -50,7 +53,7 @@ def main():
 
 #handling ONLY commands issued through server console
 def serverCommand():
-    while EXIT_STATUS == 0:
+    while True:
         command = input()
         if "g_" in command:
             g_command(client, command)

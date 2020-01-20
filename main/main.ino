@@ -26,10 +26,10 @@ byte tick[8] = {
 char ssid[] = NET_ID;                   //your network SSID (name) 
 char pass[] = NET_PWD;   			    //your network password
 int status = WL_IDLE_STATUS;			//status of WiFi connection
-IPAddress server(192,168,1,11);  		//server
+IPAddress server(192,168,0,118);  		//server
 WiFiClient client;					    //Initialize the client library
 
-//Internal Clock and alarms
+//Internal Clock and `alarms
 RTCZero rtc;
 const int GMT = 2;                      //timezone
 struct alarm_time
@@ -39,6 +39,7 @@ struct alarm_time
     int hour;
     int minute;
 };
+
 alarm_time On_Time;
 alarm_time Off_Time;
 enum geyser_state {OFF, ON};
